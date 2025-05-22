@@ -1,7 +1,7 @@
 // components/layout/MobileNavbar.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { NavItem } from "@/lib/types";
@@ -52,44 +52,43 @@ const MobileNavbar: React.FC = () => {
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const [showRibbon, setShowRibbon] = useState<boolean>(true);
     const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
-    const [lastScrollY, setLastScrollY] = useState<number>(0);
-    const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
+    const lastScrollY = useRef<number>(0);
+    const scrollThreshold = useRef<number>(10);
 
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
-            const direction = currentScrollY > lastScrollY ? 'down' : 'up';
+            const scrollDifference = Math.abs(currentScrollY - lastScrollY.current);
 
-            // Update scroll direction
-            setScrollDirection(direction);
+            // Only update if scroll difference is significant enough to prevent jitter
+            if (scrollDifference > scrollThreshold.current) {
+                const shouldShowRibbon = currentScrollY <= 30;
+                const shouldBeScrolled = currentScrollY > 30;
 
-            // Smooth transition for scroll states
-            if (direction === 'down') {
-                setIsScrolled(currentScrollY > 20);
-                setShowRibbon(currentScrollY <= 20);
-            } else {
-                setIsScrolled(currentScrollY > 20);
-                setShowRibbon(currentScrollY <= 20);
-            }
+                setShowRibbon(shouldShowRibbon);
+                setIsScrolled(shouldBeScrolled);
 
-            setLastScrollY(currentScrollY);
-        };
-
-        // Use requestAnimationFrame for smoother scroll handling
-        let ticking = false;
-        const scrollListener = () => {
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    handleScroll();
-                    ticking = false;
-                });
-                ticking = true;
+                lastScrollY.current = currentScrollY;
             }
         };
 
-        window.addEventListener("scroll", scrollListener, { passive: true });
-        return () => window.removeEventListener("scroll", scrollListener);
-    }, [lastScrollY]);
+        // Throttle scroll events for better performance
+        let timeoutId: NodeJS.Timeout;
+        const throttledScrollHandler = () => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(handleScroll, 16); // ~60fps
+        };
+
+        window.addEventListener("scroll", throttledScrollHandler, { passive: true });
+
+        // Initial call
+        handleScroll();
+
+        return () => {
+            window.removeEventListener("scroll", throttledScrollHandler);
+            clearTimeout(timeoutId);
+        };
+    }, []);
 
     const toggleMenu = () => setIsMenuOpen((prev) => !prev);
     const toggleSubmenu = (title: string) => {
@@ -97,55 +96,64 @@ const MobileNavbar: React.FC = () => {
     };
 
     return (
-        <nav className={`fixed w-full z-40 transition-all duration-300 ease-in-out ${isScrolled ? "bg-white shadow-md" : "bg-transparent"}`}>
-            <AnimatePresence mode="wait">
+        <div className="fixed w-full z-40">
+            {/* Ribbon Section */}
+            <AnimatePresence>
                 {showRibbon && (
                     <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "2.5rem" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                        initial={{ opacity: 0, y: -40 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -40 }}
+                        transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 30,
+                            mass: 0.8
+                        }}
                         className="relative bg-red-600 text-white shadow-md"
+                        style={{ height: '40px' }}
                     >
-                        <div className="max-w-7xl mx-auto px-4 h-10 flex items-center justify-between">
+                        <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
                             <ul className="flex items-center gap-4 m-0 p-0 list-none">
                                 <li>
-                                    <a href="tel:01-4520655" className="text-white hover:text-gray-200 flex items-center">
+                                    <a href="tel:01-4520655" className="text-white hover:text-gray-200 flex items-center text-sm">
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
-                                            width="16"
-                                            height="16"
+                                            width="14"
+                                            height="14"
                                             viewBox="0 0 24 24"
                                             fill="none"
                                             stroke="currentColor"
                                             strokeWidth="2"
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
-                                            className="mr-1.5"
+                                            className="mr-1.5 flex-shrink-0"
                                         >
                                             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                                         </svg>
-                                        01-4520655, 01-4520656
+                                        <span className="hidden sm:inline">01-4520655, 01-4520656</span>
+                                        <span className="sm:hidden">01-4520655</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="mailto:info@nec.gov.np" className="text-white hover:text-gray-200 flex items-center">
+                                    <a href="mailto:info@nec.gov.np" className="text-white hover:text-gray-200 flex items-center text-sm">
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
-                                            width="16"
-                                            height="16"
+                                            width="14"
+                                            height="14"
                                             viewBox="0 0 24 24"
                                             fill="none"
                                             stroke="currentColor"
                                             strokeWidth="2"
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
-                                            className="mr-1.5"
+                                            className="mr-1.5 flex-shrink-0"
                                         >
                                             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                                             <polyline points="22,6 12,13 2,6"></polyline>
                                         </svg>
-                                        info@nec.gov.np
+                                        <span className="hidden sm:inline">info@nec.gov.np</span>
+                                        <span className="sm:hidden">info@nec.gov.np</span>
                                     </a>
                                 </li>
                             </ul>
@@ -156,67 +164,112 @@ const MobileNavbar: React.FC = () => {
                 )}
             </AnimatePresence>
 
-            <motion.div
+            {/* Main Navbar Section */}
+            <motion.nav
                 animate={{
-                    top: showRibbon ? "2.5rem" : 0,
-                    transition: { type: "spring", stiffness: 200, damping: 25 }
+                    backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.98)" : "rgba(255, 255, 255, 0)",
+                    backdropFilter: isScrolled ? "blur(10px)" : "blur(0px)",
+                    boxShadow: isScrolled ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)" : "0 0 0 0 transparent",
                 }}
-                className="max-w-7xl mx-auto px-4 flex items-center justify-between py-3"
+                transition={{
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 40,
+                    mass: 0.6
+                }}
+                className="w-full"
             >
-                <Link href="/" className="flex items-center">
-                    <Image
-                        src="/images/logo-dark.png"
-                        alt="NEC Logo"
-                        width={200}
-                        height={80}
-                        className="object-contain"
-                    />
-                </Link>
+                <div className="max-w-7xl mx-auto px-4 flex items-center justify-between py-3">
+                    <Link href="/" className="flex items-center z-50">
+                        <Image
+                            src="/images/logo-dark.png"
+                            alt="NEC Logo"
+                            width={180}
+                            height={72}
+                            className="object-contain transition-all duration-300"
+                            priority
+                        />
+                    </Link>
 
-                <button
-                    className="flex flex-col gap-1.5 w-8 h-8 justify-center items-center"
-                    onClick={toggleMenu}
-                    aria-label="Toggle navigation menu"
-                >
-                    <span
-                        className={`w-full h-0.5 transition-all duration-300 ${isScrolled || isMenuOpen ? "bg-black" : "bg-white"} ${isMenuOpen ? "rotate-45 translate-y-2" : ""}`}
-                    ></span>
-                    <span
-                        className={`w-full h-0.5 transition-all duration-300 ${isScrolled || isMenuOpen ? "bg-black" : "bg-white"} ${isMenuOpen ? "opacity-0" : ""}`}
-                    ></span>
-                    <span
-                        className={`w-full h-0.5 transition-all duration-300 ${isScrolled || isMenuOpen ? "bg-black" : "bg-white"} ${isMenuOpen ? "-rotate-45 -translate-y-2" : ""}`}
-                    ></span>
-                </button>
-            </motion.div>
+                    <motion.button
+                        className="flex flex-col gap-1.5 w-8 h-8 justify-center items-center z-50 relative"
+                        onClick={toggleMenu}
+                        aria-label="Toggle navigation menu"
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    >
+                        <motion.span
+                            animate={{
+                                backgroundColor: isScrolled || isMenuOpen ? "#000000" : "#ffffff",
+                                rotate: isMenuOpen ? 45 : 0,
+                                y: isMenuOpen ? 8 : 0,
+                            }}
+                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                            className="w-full h-0.5 block origin-center"
+                        />
+                        <motion.span
+                            animate={{
+                                backgroundColor: isScrolled || isMenuOpen ? "#000000" : "#ffffff",
+                                opacity: isMenuOpen ? 0 : 1,
+                                scaleX: isMenuOpen ? 0 : 1,
+                            }}
+                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                            className="w-full h-0.5 block origin-center"
+                        />
+                        <motion.span
+                            animate={{
+                                backgroundColor: isScrolled || isMenuOpen ? "#000000" : "#ffffff",
+                                rotate: isMenuOpen ? -45 : 0,
+                                y: isMenuOpen ? -8 : 0,
+                            }}
+                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                            className="w-full h-0.5 block origin-center"
+                        />
+                    </motion.button>
+                </div>
+            </motion.nav>
 
+            {/* Mobile Menu */}
             <AnimatePresence>
                 {isMenuOpen && (
                     <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                        className="bg-white shadow-md"
+                        initial={{ opacity: 0, y: -20, height: 0 }}
+                        animate={{ opacity: 1, y: 0, height: "auto" }}
+                        exit={{ opacity: 0, y: -20, height: 0 }}
+                        transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 30,
+                            mass: 0.8
+                        }}
+                        className="bg-white/98 backdrop-blur-md shadow-lg border-t border-gray-100"
                     >
-                        <div className="max-w-7xl mx-auto px-4 py-2">
+                        <div className="max-w-7xl mx-auto px-4 py-2 max-h-96 overflow-y-auto">
                             {navItems.map((item, index) => (
-                                <div key={index} className="border-b border-gray-200 last:border-b-0">
+                                <motion.div
+                                    key={index}
+                                    className="border-b border-gray-100 last:border-b-0"
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                >
                                     {item.submenu ? (
                                         <div>
                                             <button
                                                 onClick={() => toggleSubmenu(item.title)}
-                                                className="w-full text-left px-4 py-3 font-medium text-black hover:text-indigo-500 flex justify-between items-center"
+                                                className="w-full text-left px-4 py-3 font-medium text-gray-900 hover:text-indigo-600 flex justify-between items-center transition-colors duration-200"
                                             >
                                                 {item.title}
-                                                <svg
-                                                    className={`w-4 h-4 transition-transform duration-300 ${activeSubmenu === item.title ? "rotate-180" : ""}`}
+                                                <motion.svg
+                                                    animate={{ rotate: activeSubmenu === item.title ? 180 : 0 }}
+                                                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                                                    className="w-4 h-4"
                                                     fill="none"
                                                     stroke="currentColor"
                                                     viewBox="0 0 24 24"
                                                 >
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                                </svg>
+                                                </motion.svg>
                                             </button>
                                             <AnimatePresence>
                                                 {activeSubmenu === item.title && (
@@ -224,19 +277,31 @@ const MobileNavbar: React.FC = () => {
                                                         initial={{ opacity: 0, height: 0 }}
                                                         animate={{ opacity: 1, height: "auto" }}
                                                         exit={{ opacity: 0, height: 0 }}
-                                                        transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                                                        className="pl-4 pb-2"
+                                                        transition={{
+                                                            type: "spring",
+                                                            stiffness: 300,
+                                                            damping: 30
+                                                        }}
+                                                        className="pl-4 pb-2 bg-gray-50/50"
                                                     >
                                                         {item.submenu.map((subitem, subindex) => (
-                                                            <li key={subindex}>
+                                                            <motion.li
+                                                                key={subindex}
+                                                                initial={{ opacity: 0, x: -10 }}
+                                                                animate={{ opacity: 1, x: 0 }}
+                                                                transition={{ delay: subindex * 0.05 }}
+                                                            >
                                                                 <Link
                                                                     href={subitem.href}
-                                                                    className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-indigo-600"
-                                                                    onClick={() => setIsMenuOpen(false)}
+                                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-indigo-600 rounded-md transition-colors duration-200"
+                                                                    onClick={() => {
+                                                                        setIsMenuOpen(false);
+                                                                        setActiveSubmenu(null);
+                                                                    }}
                                                                 >
                                                                     {subitem.title}
                                                                 </Link>
-                                                            </li>
+                                                            </motion.li>
                                                         ))}
                                                     </motion.ul>
                                                 )}
@@ -245,19 +310,22 @@ const MobileNavbar: React.FC = () => {
                                     ) : (
                                         <Link
                                             href={item.href}
-                                            className="block px-4 py-3 font-medium text-black hover:text-indigo-500"
-                                            onClick={() => setIsMenuOpen(false)}
+                                            className="block px-4 py-3 font-medium text-gray-900 hover:text-indigo-600 transition-colors duration-200"
+                                            onClick={() => {
+                                                setIsMenuOpen(false);
+                                                setActiveSubmenu(null);
+                                            }}
                                         >
                                             {item.title}
                                         </Link>
                                     )}
-                                </div>
+                                </motion.div>
                             ))}
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
-        </nav>
+        </div>
     );
 };
 
