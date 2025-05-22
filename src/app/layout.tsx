@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import BackToTop from "@/components/ui/BackToTop";
+import Contact from "@/components/ui/Contact";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -27,6 +28,7 @@ export default function RootLayout({
         <Header />
         <main>{children}</main>
         <Footer />
+        <Contact />
         <BackToTop />
       </body>
     </html>

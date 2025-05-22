@@ -1,13 +1,45 @@
-import React from "react";
+"use client"
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
 const About: React.FC = () => {
+  const imageRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              entry.target.classList.add("animate-fade-in-up");
+            }, 100);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.2, rootMargin: "-50px" }
+    );
+
+    // Store refs in variables to use in cleanup
+    const currentImageRef = imageRef.current;
+    const currentContentRef = contentRef.current;
+
+    if (currentImageRef) observer.observe(currentImageRef);
+    if (currentContentRef) observer.observe(currentContentRef);
+
+    return () => {
+      if (currentImageRef) observer.unobserve(currentImageRef);
+      if (currentContentRef) observer.unobserve(currentContentRef);
+    };
+  }, []); // Empty dependency array since we're using refs
+
   return (
     <section className="relative py-8 sm:py-16 bg-gray-50 flex items-center justify-center min-h-[calc(65vh-64px)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-12 grid-cols-1 items-center gap-6 sm:gap-8 justify-items-center">
-          <div className="md:col-span-5">
+          <div ref={imageRef} className="md:col-span-5 opacity-0">
             <div className="relative">
               <Image
                 src="/images/about/ab01.jpg"
@@ -28,7 +60,7 @@ const About: React.FC = () => {
             </div>
           </div>
 
-          <div className="md:col-span-7">
+          <div ref={contentRef} className="md:col-span-7 opacity-0">
             <div className="lg:ms-6 text-center md:text-left">
               <h3 className="mb-6 text-2xl sm:text-3xl font-semibold">
                 Welcome to Nepal Engineering Council

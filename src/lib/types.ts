@@ -6,7 +6,7 @@ export interface NavItem {
 }
 
 export interface ServiceItem {
-  icon: string;
+  icon: string | React.ReactElement;
   title: string;
   description: string;
   link: string;

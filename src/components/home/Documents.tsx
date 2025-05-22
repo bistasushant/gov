@@ -1,9 +1,11 @@
-import React from "react";
+"use client"
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import { DocumentItem } from "@/lib/types";
+import { Bell, Bookmark, File, FileText, Folder, Package, PenTool, SquarePen } from "lucide-react";
 
 interface DocumentCategoryProps {
-  icon: string;
+  icon: string | React.ReactElement;
   title: string;
   link: string;
 }
@@ -13,26 +15,49 @@ const DocumentCategory: React.FC<DocumentCategoryProps> = ({
   title,
   link,
 }) => {
+  const cardRef = useRef<HTMLAnchorElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              entry.target.classList.add("animate-fade-in-up");
+            }, 100);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.2, rootMargin: "-50px" }
+    );
+
+    // Store ref in variable to use in cleanup
+    const currentCardRef = cardRef.current;
+
+    if (currentCardRef) {
+      observer.observe(currentCardRef);
+    }
+
+    return () => {
+      if (currentCardRef) {
+        observer.unobserve(currentCardRef);
+      }
+    };
+  }, []); // Empty dependency array since we're using refs
+
   return (
     <Link
+      ref={cardRef}
       href={link}
-      className="group relative p-4 sm:p-6 shadow rounded-md bg-white overflow-hidden hover:shadow-lg transition-all duration-500 max-w-sm w-full flex flex-col items-center justify-center text-center"
+      className="group relative p-4 sm:p-6 shadow rounded-md bg-white overflow-hidden hover:shadow-lg transition-all duration-500 max-w-sm w-full flex flex-col items-center justify-center text-center opacity-0"
     >
       <div className="w-16 h-16 flex items-center justify-center bg-indigo-600/10 group-hover:bg-indigo-600 rounded-full text-indigo-600 group-hover:text-white transition-all duration-500 mb-4">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-6 w-6"
-        >
-          <path d={icon}></path>
-        </svg>
+        {typeof icon === 'string' ? (
+          <span className="h-6 w-6">{icon}</span>
+        ) : (
+          icon
+        )}
       </div>
       <h5 className="text-lg font-medium group-hover:text-indigo-600 transition-all duration-500">
         {title}
@@ -42,44 +67,79 @@ const DocumentCategory: React.FC<DocumentCategoryProps> = ({
 };
 
 const Documents: React.FC = () => {
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const tableRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              entry.target.classList.add("animate-fade-in-up");
+            }, 100);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.2, rootMargin: "-50px" }
+    );
+
+    // Store refs in variables to use in cleanup
+    const currentTitleRef = titleRef.current;
+    const currentTableRef = tableRef.current;
+    const currentButtonRef = buttonRef.current;
+
+    if (currentTitleRef) observer.observe(currentTitleRef);
+    if (currentTableRef) observer.observe(currentTableRef);
+    if (currentButtonRef) observer.observe(currentButtonRef);
+
+    return () => {
+      if (currentTitleRef) observer.unobserve(currentTitleRef);
+      if (currentTableRef) observer.unobserve(currentTableRef);
+      if (currentButtonRef) observer.unobserve(currentButtonRef);
+    };
+  }, []); // Empty dependency array since we're using refs
+
   const documentCategories: DocumentCategoryProps[] = [
     {
-      icon: "M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0",
+      icon: <Bell />,
       title: "Notices",
       link: "/notices",
     },
     {
-      icon: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8",
+      icon: <FileText />,
       title: "Exams",
       link: "/exams",
     },
     {
-      icon: "M12 19l7-7 3 3-7 7-3-3z M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z M2 2l7.586 7.586 M11 11l5 5",
+      icon: <PenTool />,
       title: "Publications",
       link: "/publications",
     },
     {
-      icon: "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z M3.27 6.96L12 12.01l8.73-5.05 M12 22.08V12",
+      icon: <Package />,
       title: "Tenders",
       link: "/tenders",
     },
     {
-      icon: "M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z M13 2v7h7",
+      icon: <File />,
       title: "Official Documents",
       link: "/official-documents",
     },
     {
-      icon: "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z",
-      title: "PEng Documents",
+      icon: <Bookmark />,
+      title: "Peng Documents",
       link: "/peng-documents",
     },
     {
-      icon: "M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z",
+      icon: <SquarePen />,
       title: "Forms",
       link: "/forms",
     },
     {
-      icon: "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z",
+      icon: <Folder />,
       title: "Other Documents",
       link: "/other-documents",
     },
@@ -112,7 +172,10 @@ const Documents: React.FC = () => {
     <section className="relative py-8 sm:py-16 bg-stone-100/90 flex items-center justify-center min-h-[calc(65vh-64px)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center pb-8 text-center">
-          <h3 className="mb-4 text-2xl sm:text-3xl font-semibold">
+          <h3
+            ref={titleRef}
+            className="mb-4 text-2xl sm:text-3xl font-semibold opacity-0"
+          >
             Important Documents
           </h3>
         </div>
@@ -126,7 +189,7 @@ const Documents: React.FC = () => {
             />
           ))}
         </div>
-        <div className="mt-12">
+        <div ref={tableRef} className="mt-12 opacity-0">
           <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
             <table className="w-full text-sm text-left text-gray-500">
               <thead className="text-xs text-white uppercase bg-indigo-600">
@@ -167,7 +230,7 @@ const Documents: React.FC = () => {
               </tbody>
             </table>
           </div>
-          <div className="flex justify-center mt-6">
+          <div ref={buttonRef} className="flex justify-center mt-6 opacity-0">
             <Link
               href="/documents"
               className="py-2 px-5 inline-block font-semibold tracking-wide border align-middle duration-500 text-base text-center bg-indigo-600 hover:bg-indigo-700 border-indigo-600 hover:border-indigo-700 text-white rounded-md"

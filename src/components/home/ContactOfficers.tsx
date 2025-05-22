@@ -1,4 +1,5 @@
-import React from "react";
+"use client"
+import React, { useEffect, useRef } from "react";
 import Image from "next/image";
 import { ContactOfficerItem } from "@/lib/types";
 
@@ -12,16 +13,50 @@ const ContactOfficer: React.FC<ContactOfficerItem> = ({
   email,
   position,
 }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              entry.target.classList.add("animate-fade-in-up");
+            }, 100);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.2, rootMargin: "-50px" }
+    );
+
+    // Store ref in variable to use in cleanup
+    const currentCardRef = cardRef.current;
+
+    if (currentCardRef) {
+      observer.observe(currentCardRef);
+    }
+
+    return () => {
+      if (currentCardRef) {
+        observer.unobserve(currentCardRef);
+      }
+    };
+  }, []); // Empty dependency array since we're using refs
+
   return (
-    <div className="group relative p-4 sm:p-6 shadow rounded-md bg-white overflow-hidden hover:shadow-lg transition-all duration-500 max-w-lg w-full">
+    <div
+      ref={cardRef}
+      className="group relative p-4 sm:p-6 shadow rounded-md bg-white overflow-hidden hover:shadow-lg transition-all duration-500 max-w-lg w-full opacity-0"
+    >
       <div className="flex flex-col items-center">
-        <div className="mb-4">
+        <div className="mb-4 overflow-hidden rounded-full">
           <Image
             src={image}
             alt={title}
             width={128}
             height={128}
-            className="h-32 w-32 rounded-full object-cover"
+            className="h-32 w-32 rounded-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
         </div>
         <div className="text-center">
@@ -41,6 +76,37 @@ const ContactOfficer: React.FC<ContactOfficerItem> = ({
 };
 
 const ContactOfficers: React.FC = () => {
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              entry.target.classList.add("animate-fade-in-up");
+            }, 100);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.2, rootMargin: "-50px" }
+    );
+
+    // Store ref in variable to use in cleanup
+    const currentTitleRef = titleRef.current;
+
+    if (currentTitleRef) {
+      observer.observe(currentTitleRef);
+    }
+
+    return () => {
+      if (currentTitleRef) {
+        observer.unobserve(currentTitleRef);
+      }
+    };
+  }, []); // Empty dependency array since we're using refs
+
   const officers: ContactOfficerItem[] = [
     {
       image: "/images/client/03.jpg",
@@ -68,7 +134,10 @@ const ContactOfficers: React.FC = () => {
     <section className="relative py-8 sm:py-16 bg-gray-50 flex items-center justify-center min-h-[calc(65vh-64px)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center pb-8 text-center">
-          <h3 className="mb-4 text-2xl sm:text-3xl font-semibold">
+          <h3
+            ref={titleRef}
+            className="mb-4 text-2xl sm:text-3xl font-semibold opacity-0"
+          >
             Contact Officers
           </h3>
         </div>

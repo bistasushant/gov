@@ -14,7 +14,7 @@ function NavigationMenu({
     <NavigationMenuPrimitive.Root
       data-slot="navigation-menu"
       className={cn(
-        "relative flex max-w-max flex-1 items-center justify-center",
+        "group/navigation-menu relative flex max-w-max flex-1 items-center justify-center",
         className
       )}
       {...props}
@@ -88,7 +88,7 @@ function NavigationMenuContent({
       data-slot="navigation-menu-content"
       className={cn(
         "absolute left-0 top-full mt-6.5 w-[200px] bg-white rounded-md shadow-lg z-50",
-        "data-[state=open]:animate-in data-[state=open]:fade-in data-[state=closed]:animate-out data-[state=closed]:fade-out",
+        "data-[motion=from-start]:animate-enter-from-start data-[motion=from-end]:animate-enter-from-end data-[motion=to-start]:animate-exit-to-start data-[motion=to-end]:animate-exit-to-end",
         className
       )}
       {...props}

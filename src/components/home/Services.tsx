@@ -1,6 +1,8 @@
-import React from "react";
+"use client"
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import { ServiceItem } from "@/lib/types";
+import { BookOpen, Shield, User } from "lucide-react";
 
 const ServiceCard: React.FC<ServiceItem> = ({
   icon,
@@ -8,23 +10,48 @@ const ServiceCard: React.FC<ServiceItem> = ({
   description,
   link,
 }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              entry.target.classList.add("animate-fade-in-up");
+            }, 100);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.2, rootMargin: "-50px" }
+    );
+
+    // Store ref in variable to use in cleanup
+    const currentCardRef = cardRef.current;
+
+    if (currentCardRef) {
+      observer.observe(currentCardRef);
+    }
+
+    return () => {
+      if (currentCardRef) {
+        observer.unobserve(currentCardRef);
+      }
+    };
+  }, []); // Empty dependency array since we're using refs
+
   return (
-    <div className="group relative p-4 sm:p-6 shadow rounded-md bg-white overflow-hidden hover:shadow-lg transition-all duration-500 max-w-sm w-full">
+    <div
+      ref={cardRef}
+      className="group relative p-4 sm:p-6 shadow rounded-md bg-white overflow-hidden hover:shadow-lg transition-all duration-500 max-w-sm w-full opacity-0"
+    >
       <div className="w-14 h-14 flex items-center justify-center bg-indigo-600 group-hover:bg-indigo-700 rounded-md text-white transition-all duration-500 mb-6 mx-auto">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-6 w-6"
-        >
-          <path d={icon}></path>
-        </svg>
+        {typeof icon === 'string' ? (
+          <span className="h-6 w-6">{icon}</span>
+        ) : (
+          icon
+        )}
       </div>
       <h4 className="text-lg font-medium group-hover:text-indigo-600 transition-all duration-500 text-center">
         {title}
@@ -43,23 +70,54 @@ const ServiceCard: React.FC<ServiceItem> = ({
 };
 
 const Services: React.FC = () => {
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const descRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              entry.target.classList.add("animate-fade-in-up");
+            }, 100);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.2, rootMargin: "-50px" }
+    );
+
+    // Store refs in variables to use in cleanup
+    const currentTitleRef = titleRef.current;
+    const currentDescRef = descRef.current;
+
+    if (currentTitleRef) observer.observe(currentTitleRef);
+    if (currentDescRef) observer.observe(currentDescRef);
+
+    return () => {
+      if (currentTitleRef) observer.unobserve(currentTitleRef);
+      if (currentDescRef) observer.unobserve(currentDescRef);
+    };
+  }, []); // Empty dependency array since we're using refs
+
   const services: ServiceItem[] = [
     {
-      icon: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
+      icon: <User />,
       title: "Engineer Registration",
       description:
         "Register as a professional engineer and get recognized for your qualifications and expertise.",
       link: "/register-online",
     },
     {
-      icon: "M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z",
+      icon: <BookOpen />,
       title: "Professional Development",
       description:
         "Access resources and opportunities for continuous professional development and growth.",
       link: "/professional-eng",
     },
     {
-      icon: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
+      icon: <Shield />,
       title: "Quality Assurance",
       description:
         "Ensuring high standards of engineering practice through regulation and oversight.",
@@ -71,10 +129,16 @@ const Services: React.FC = () => {
     <section className="relative py-8 sm:py-16 bg-stone-100/90 flex items-center justify-center min-h-[calc(65vh-64px)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center pb-8 text-center">
-          <h3 className="mb-4 text-2xl sm:text-3xl font-medium">
+          <h3
+            ref={titleRef}
+            className="mb-4 text-2xl sm:text-3xl font-medium opacity-0"
+          >
             Our Services
           </h3>
-          <p className="text-slate-400 max-w-xl mx-auto mb-8">
+          <p
+            ref={descRef}
+            className="text-slate-400 max-w-xl mx-auto mb-8 opacity-0"
+          >
             Providing professional engineering services and regulatory oversight
             for the engineering profession in Nepal.
           </p>
