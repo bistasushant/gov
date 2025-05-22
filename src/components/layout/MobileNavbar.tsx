@@ -167,7 +167,7 @@ const MobileNavbar: React.FC = () => {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 25 }}
                         className="bg-white shadow-md"
                     >
                         <div className="max-w-7xl mx-auto px-4 py-2">
@@ -181,7 +181,7 @@ const MobileNavbar: React.FC = () => {
                                             >
                                                 {item.title}
                                                 <svg
-                                                    className={`w-4 h-4 transition-transform ${activeSubmenu === item.title ? "rotate-180" : ""}`}
+                                                    className={`w-4 h-4 transition-transform duration-300 ${activeSubmenu === item.title ? "rotate-180" : ""}`}
                                                     fill="none"
                                                     stroke="currentColor"
                                                     viewBox="0 0 24 24"
@@ -195,7 +195,7 @@ const MobileNavbar: React.FC = () => {
                                                         initial={{ opacity: 0, height: 0 }}
                                                         animate={{ opacity: 1, height: "auto" }}
                                                         exit={{ opacity: 0, height: 0 }}
-                                                        transition={{ duration: 0.2 }}
+                                                        transition={{ type: "spring", stiffness: 200, damping: 25 }}
                                                         className="pl-4 pb-2"
                                                     >
                                                         {item.submenu.map((subitem, subindex) => (
