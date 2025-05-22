@@ -52,17 +52,35 @@ const MobileNavbar: React.FC = () => {
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const [showRibbon, setShowRibbon] = useState<boolean>(true);
     const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
+    const [lastScrollY, setLastScrollY] = useState<number>(0);
 
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
-            setIsScrolled(currentScrollY > 50);
-            setShowRibbon(currentScrollY <= 50);
+
+            // Update scroll states with a small threshold to prevent jitter
+            if (Math.abs(currentScrollY - lastScrollY) > 5) {
+                setIsScrolled(currentScrollY > 50);
+                setShowRibbon(currentScrollY <= 50);
+                setLastScrollY(currentScrollY);
+            }
         };
 
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+        // Use requestAnimationFrame for smoother scroll handling
+        let ticking = false;
+        const scrollListener = () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    handleScroll();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        };
+
+        window.addEventListener("scroll", scrollListener, { passive: true });
+        return () => window.removeEventListener("scroll", scrollListener);
+    }, [lastScrollY]);
 
     const toggleMenu = () => setIsMenuOpen((prev) => !prev);
     const toggleSubmenu = (title: string) => {
@@ -70,8 +88,8 @@ const MobileNavbar: React.FC = () => {
     };
 
     return (
-        <nav className={`fixed w-full z-40 transition-all duration-300 ${isScrolled ? "bg-white shadow-md" : "bg-transparent"}`}>
-            <AnimatePresence>
+        <nav className={`fixed w-full z-40 transition-all duration-300 ease-in-out ${isScrolled ? "bg-white shadow-md" : "bg-transparent"}`}>
+            <AnimatePresence mode="wait">
                 {showRibbon && (
                     <motion.div
                         initial={{ opacity: 0, height: 0 }}
