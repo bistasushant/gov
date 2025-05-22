@@ -1,6 +1,4 @@
-// components/layout/Navbar.tsx
 "use client";
-
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -71,7 +69,10 @@ const Navbar: React.FC = () => {
   }, []);
 
   return (
-    <nav className={`fixed w-full z-40 transition-all duration-300 ${isScrolled ? "bg-white shadow-md" : "bg-transparent"}`}>
+    <nav
+      className={`fixed w-full z-40 transition-all duration-300 ${isScrolled ? "bg-white shadow-md" : "bg-transparent"
+        }`}
+    >
       <AnimatePresence>
         {showRibbon && (
           <motion.div
@@ -152,12 +153,13 @@ const Navbar: React.FC = () => {
                 {item.submenu ? (
                   <>
                     <NavigationMenuTrigger
-                      className={`px-4 py-2 font-medium ${isScrolled ? "text-black hover:text-indigo-500" : "text-white hover:text-indigo-200"}`}
+                      className={`px-4 py-2 font-medium ${isScrolled ? "text-black hover:text-indigo-500" : "text-white hover:text-indigo-200"
+                        }`}
                     >
                       {item.title}
                     </NavigationMenuTrigger>
-                    <NavigationMenuContent className="absolute left-0 top-full mt-2 w-48 bg-white shadow-md rounded-md z-50">
-                      <ul className="grid w-full p-2">
+                    <NavigationMenuContent>
+                      <ul className="grid w-[200px] p-2">
                         {item.submenu.map((subitem, subindex) => (
                           <li key={subindex}>
                             <NavigationMenuLink asChild>
@@ -177,7 +179,8 @@ const Navbar: React.FC = () => {
                   <NavigationMenuLink asChild>
                     <Link
                       href={item.href}
-                      className={`block px-4 py-2 font-medium ${isScrolled ? "text-black hover:text-indigo-500" : "text-white hover:text-indigo-200"}`}
+                      className={`block px-4 py-2 font-medium ${isScrolled ? "text-black hover:text-indigo-500" : "text-white hover:text-indigo-200"
+                        }`}
                     >
                       {item.title}
                     </Link>
