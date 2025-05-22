@@ -49,36 +49,50 @@ const navItems: NavItem[] = [
 
 const MobileNavbar: React.FC = () => {
     const [scrollY, setScrollY] = useState(0);
+    const [prevScrollY, setPrevScrollY] = useState(0);
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
 
-    // Derived states based on scroll position
+    // Calculate derived states
     const showRibbon = scrollY <= 50;
-    const isScrolled = scrollY > 50;
+    const isScrolled = scrollY > 0;
     const ribbonHeight = showRibbon ? 40 : 0;
+    const navbarOffset = showRibbon ? 40 : 0;
 
     const rafRef = useRef<number | undefined>(undefined);
+    const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const handleScroll = useCallback(() => {
-        if (rafRef.current) {
-            cancelAnimationFrame(rafRef.current);
+        if (scrollTimeoutRef.current) {
+            clearTimeout(scrollTimeoutRef.current);
         }
 
-        rafRef.current = requestAnimationFrame(() => {
+        // Use debounce to reduce jankiness
+        scrollTimeoutRef.current = setTimeout(() => {
             const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
-            setScrollY(currentScrollY);
-        });
-    }, []);
+
+            // Only update state if scroll position actually changed
+            if (Math.abs(currentScrollY - scrollY) > 1) {
+                setPrevScrollY(scrollY);
+                setScrollY(currentScrollY);
+            }
+        }, 16); // ~60fps
+    }, [scrollY]);
 
     useEffect(() => {
         // Set initial scroll position
-        setScrollY(window.pageYOffset || document.documentElement.scrollTop);
+        const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
+        setScrollY(currentScrollY);
+        setPrevScrollY(currentScrollY);
 
         // Add scroll listener
         window.addEventListener('scroll', handleScroll, { passive: true });
 
         return () => {
             window.removeEventListener('scroll', handleScroll);
+            if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
+            }
             if (rafRef.current) {
                 cancelAnimationFrame(rafRef.current);
             }
@@ -100,11 +114,12 @@ const MobileNavbar: React.FC = () => {
                 animate={{
                     height: ribbonHeight,
                     opacity: showRibbon ? 1 : 0,
+                    y: showRibbon ? 0 : -40,
                 }}
                 transition={{
-                    type: "tween",
-                    duration: 0.3,
-                    ease: [0.4, 0, 0.2, 1]
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 30,
                 }}
                 className="relative bg-red-600 text-white shadow-md overflow-hidden"
             >
@@ -168,12 +183,13 @@ const MobileNavbar: React.FC = () => {
                 animate={{
                     backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.95)" : "rgba(0, 0, 0, 0)",
                     backdropFilter: isScrolled ? "blur(10px)" : "blur(0px)",
-                    boxShadow: isScrolled ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)" : "0 0 0 0 transparent",
+                    boxShadow: isScrolled ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)" : "none",
+                    y: showRibbon ? navbarOffset : 0,
                 }}
                 transition={{
-                    type: "tween",
-                    duration: 0.3,
-                    ease: [0.4, 0, 0.2, 1]
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 30,
                 }}
                 className="w-full"
             >
@@ -250,6 +266,9 @@ const MobileNavbar: React.FC = () => {
                             ease: [0.4, 0, 0.2, 1]
                         }}
                         className="bg-white/95 backdrop-blur-md shadow-lg border-t border-gray-100"
+                        style={{
+                            marginTop: navbarOffset
+                        }}
                     >
                         <div className="max-w-7xl mx-auto px-4 py-2 max-h-96 overflow-y-auto">
                             {navItems.map((item, index) => (
