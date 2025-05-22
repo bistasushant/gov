@@ -56,24 +56,51 @@ const navItems: NavItem[] = [
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [showRibbon, setShowRibbon] = useState<boolean>(true);
+  const [lastScrollY, setLastScrollY] = useState<number>(0);
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      setIsScrolled(currentScrollY > 50);
-      setShowRibbon(currentScrollY <= 50);
+      const direction = currentScrollY > lastScrollY ? 'down' : 'up';
+
+      // Update scroll direction
+      setScrollDirection(direction);
+
+      // Smooth transition for scroll states
+      if (direction === 'down') {
+        setIsScrolled(currentScrollY > 20);
+        setShowRibbon(currentScrollY <= 20);
+      } else {
+        setIsScrolled(currentScrollY > 20);
+        setShowRibbon(currentScrollY <= 20);
+      }
+
+      setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    // Use requestAnimationFrame for smoother scroll handling
+    let ticking = false;
+    const scrollListener = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", scrollListener, { passive: true });
+    return () => window.removeEventListener("scroll", scrollListener);
+  }, [lastScrollY]);
 
   return (
     <nav
-      className={`fixed w-full z-40 transition-all duration-300 ${isScrolled ? "bg-white shadow-md" : "bg-transparent"
+      className={`fixed w-full z-40 transition-all duration-300 ease-in-out ${isScrolled ? "bg-white shadow-md" : "bg-transparent"
         }`}
     >
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {showRibbon && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
@@ -132,8 +159,10 @@ const Navbar: React.FC = () => {
       </AnimatePresence>
 
       <motion.div
-        animate={{ top: showRibbon ? "2.5rem" : 0 }}
-        transition={{ type: "spring", stiffness: 200, damping: 25 }}
+        animate={{
+          top: showRibbon ? "2.5rem" : 0,
+          transition: { type: "spring", stiffness: 200, damping: 25 }
+        }}
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between py-3"
       >
         <Link href="/" className="flex items-center">

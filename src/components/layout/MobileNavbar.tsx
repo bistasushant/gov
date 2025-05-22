@@ -53,17 +53,26 @@ const MobileNavbar: React.FC = () => {
     const [showRibbon, setShowRibbon] = useState<boolean>(true);
     const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
     const [lastScrollY, setLastScrollY] = useState<number>(0);
+    const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
 
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
+            const direction = currentScrollY > lastScrollY ? 'down' : 'up';
 
-            // Update scroll states with a small threshold to prevent jitter
-            if (Math.abs(currentScrollY - lastScrollY) > 5) {
-                setIsScrolled(currentScrollY > 50);
-                setShowRibbon(currentScrollY <= 50);
-                setLastScrollY(currentScrollY);
+            // Update scroll direction
+            setScrollDirection(direction);
+
+            // Smooth transition for scroll states
+            if (direction === 'down') {
+                setIsScrolled(currentScrollY > 20);
+                setShowRibbon(currentScrollY <= 20);
+            } else {
+                setIsScrolled(currentScrollY > 20);
+                setShowRibbon(currentScrollY <= 20);
             }
+
+            setLastScrollY(currentScrollY);
         };
 
         // Use requestAnimationFrame for smoother scroll handling
@@ -148,8 +157,10 @@ const MobileNavbar: React.FC = () => {
             </AnimatePresence>
 
             <motion.div
-                animate={{ top: showRibbon ? "2.5rem" : 0 }}
-                transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                animate={{
+                    top: showRibbon ? "2.5rem" : 0,
+                    transition: { type: "spring", stiffness: 200, damping: 25 }
+                }}
                 className="max-w-7xl mx-auto px-4 flex items-center justify-between py-3"
             >
                 <Link href="/" className="flex items-center">
