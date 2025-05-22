@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { NavItem } from "@/lib/types";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -12,46 +11,7 @@ import {
   NavigationMenuTrigger,
 } from "../ui/navigation-menu";
 import { motion, AnimatePresence } from "framer-motion";
-
-const navItems: NavItem[] = [
-  { title: "Home", href: "/" },
-  {
-    title: "About NEC",
-    href: "#",
-    submenu: [
-      { title: "Background", href: "/background" },
-      { title: "Objective And Vision", href: "/objective-vision" },
-      { title: "Governing Board", href: "/governing-board" },
-      { title: "Committees", href: "/committees" },
-      { title: "Organizational Chart", href: "/organizational-chart" },
-      { title: "Message From Chairman", href: "/message-chairman" },
-      { title: "Message From Registrar", href: "/message-registrar" },
-    ],
-  },
-  {
-    title: "Registration",
-    href: "#",
-    submenu: [{ title: "Register Online", href: "/register-online" }],
-  },
-  {
-    title: "General Engineers",
-    href: "#",
-    submenu: [
-      { title: "Hardcopy Registered (Before 2020)", href: "/hardcopy-registered" },
-      { title: "Online Registered (After 2020)", href: "/online-registered" },
-    ],
-  },
-  {
-    title: "More",
-    href: "#",
-    submenu: [
-      { title: "Recognized Institutions", href: "/recognized-institutions" },
-      { title: "Professional ENG", href: "/professional-eng" },
-      { title: "Downloads", href: "/downloads" },
-      { title: "Contact Us", href: "/contact" },
-    ],
-  },
-];
+import { navItems } from "@/utils/NavbarHeader";
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
@@ -178,33 +138,37 @@ const Navbar: React.FC = () => {
                 {item.submenu ? (
                   <>
                     <NavigationMenuTrigger
-                      className={`px-4 py-2 font-medium ${isScrolled ? "text-black hover:text-indigo-500" : "text-white hover:text-indigo-200"
+                      className={`px-4 py-2 font-bold ${isScrolled ? "text-black hover:text-indigo-500" : "text-white hover:text-indigo-200"
                         }`}
                     >
                       {item.title}
                     </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <ul className="grid w-[200px] p-2">
-                        {item.submenu.map((subitem, subindex) => (
-                          <li key={subindex}>
-                            <NavigationMenuLink asChild>
-                              <Link
-                                href={subitem.href}
-                                className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-indigo-600"
-                              >
-                                {subitem.title}
-                              </Link>
-                            </NavigationMenuLink>
-                          </li>
-                        ))}
-                      </ul>
-                    </NavigationMenuContent>
+                    <div className="relative">
+
+                      <NavigationMenuContent className="absolute right-0 sm:left-0 sm:right-auto mt-2 z-[9999]">
+                        <ul className="grid w-[300px] max-h-[80vh] overflow-auto bg-white shadow-lg border border-gray-200 rounded-md p-2">
+                          {item.submenu.map((subitem, subindex) => (
+                            <li key={subindex}>
+                              <NavigationMenuLink asChild>
+                                <Link
+                                  href={subitem.href}
+                                  className="block px-4 py-2 text-sm font-bold text-gray-800 hover:bg-gray-100 hover:text-indigo-600"
+                                >
+                                  {subitem.title}
+                                </Link>
+                              </NavigationMenuLink>
+                            </li>
+                          ))}
+                        </ul>
+                      </NavigationMenuContent>
+                    </div>
+
                   </>
                 ) : (
                   <NavigationMenuLink asChild>
                     <Link
                       href={item.href}
-                      className={`block px-4 py-2 font-medium ${isScrolled ? "text-black hover:text-indigo-500" : "text-white hover:text-indigo-200"
+                      className={`block px-4 py-2 font-bold ${isScrolled ? "text-black hover:text-indigo-500" : "text-white hover:text-indigo-200"
                         }`}
                     >
                       {item.title}

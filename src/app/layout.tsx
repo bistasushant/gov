@@ -8,7 +8,6 @@ import BackToTop from "@/components/ui/BackToTop";
 const nunito = Nunito({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-nunito",
 });
 
 export const metadata: Metadata = {
@@ -24,9 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="light scroll-smooth" dir="ltr">
-      <body
-        className={`${nunito.variable} font-nunito text-base text-black antialiased`}
-      >
+      <body className={`${nunito.className} font-sans text-base text-black antialiased`}>
         <Header />
         <main>{children}</main>
         <Footer />

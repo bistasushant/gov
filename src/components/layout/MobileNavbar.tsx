@@ -4,48 +4,8 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { NavItem } from "@/lib/types";
 import { motion, AnimatePresence } from "framer-motion";
-
-const navItems: NavItem[] = [
-    { title: "Home", href: "/" },
-    {
-        title: "About NEC",
-        href: "#",
-        submenu: [
-            { title: "Background", href: "/background" },
-            { title: "Objective And Vision", href: "/objective-vision" },
-            { title: "Governing Board", href: "/governing-board" },
-            { title: "Committees", href: "/committees" },
-            { title: "Organizational Chart", href: "/organizational-chart" },
-            { title: "Message From Chairman", href: "/message-chairman" },
-            { title: "Message From Registrar", href: "/message-registrar" },
-        ],
-    },
-    {
-        title: "Registration",
-        href: "#",
-        submenu: [{ title: "Register Online", href: "/register-online" }],
-    },
-    {
-        title: "General Engineers",
-        href: "#",
-        submenu: [
-            { title: "Hardcopy Registered (Before 2020)", href: "/hardcopy-registered" },
-            { title: "Online Registered (After 2020)", href: "/online-registered" },
-        ],
-    },
-    {
-        title: "More",
-        href: "#",
-        submenu: [
-            { title: "Recognized Institutions", href: "/recognized-institutions" },
-            { title: "Professional ENG", href: "/professional-eng" },
-            { title: "Downloads", href: "/downloads" },
-            { title: "Contact Us", href: "/contact" },
-        ],
-    },
-];
+import { navItems } from "@/utils/NavbarHeader";
 
 const MobileNavbar: React.FC = () => {
     const [scrollY, setScrollY] = useState(0);
@@ -165,7 +125,7 @@ const MobileNavbar: React.FC = () => {
             <motion.div
                 initial={false}
                 animate={{
-                    y: showRibbon ? 0 : -ribbonHeight,
+                    y: 0,
                 }}
                 transition={{
                     type: "spring",
@@ -184,7 +144,7 @@ const MobileNavbar: React.FC = () => {
                     }}
                     className="w-full"
                 >
-                    <div className="max-w-7xl mx-auto px-4 flex items-center justify-between py-3">
+                    <div className={`max-w-7xl mx-auto px-4 flex items-center justify-between py-3 ${isMenuOpen && "bg-white/95 backdrop-blur-md "}`}>
                         <Link href="/" className="flex items-center z-50">
                             <Image
                                 src="/images/logo-dark.png"
@@ -247,13 +207,13 @@ const MobileNavbar: React.FC = () => {
                                 {navItems.map((item, index) => (
                                     <div
                                         key={index}
-                                        className="border-b border-gray-100 last:border-b-0"
+                                        className="border-b border-gray-100 last:border-b-0 "
                                     >
                                         {item.submenu ? (
                                             <div>
                                                 <button
                                                     onClick={() => toggleSubmenu(item.title)}
-                                                    className="w-full text-left px-4 py-3 font-medium text-gray-900 hover:text-indigo-600 flex justify-between items-center transition-colors duration-200"
+                                                    className="w-full text-left px-4 py-3 font-bold text-gray-900 hover:text-indigo-600 flex justify-between items-center transition-colors duration-200"
                                                 >
                                                     {item.title}
                                                     <motion.svg
@@ -288,7 +248,7 @@ const MobileNavbar: React.FC = () => {
                                                                 <li key={subindex}>
                                                                     <Link
                                                                         href={subitem.href}
-                                                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-indigo-600 rounded-md transition-colors duration-200"
+                                                                        className="block px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-100 hover:text-indigo-600 rounded-md transition-colors duration-200"
                                                                         onClick={() => {
                                                                             setIsMenuOpen(false);
                                                                             setActiveSubmenu(null);
@@ -305,7 +265,7 @@ const MobileNavbar: React.FC = () => {
                                         ) : (
                                             <Link
                                                 href={item.href}
-                                                className="block px-4 py-3 font-medium text-gray-900 hover:text-indigo-600 transition-colors duration-200"
+                                                className="block px-4 py-3 font-bold text-gray-900 hover:text-indigo-600 transition-colors duration-200"
                                                 onClick={() => {
                                                     setIsMenuOpen(false);
                                                     setActiveSubmenu(null);
