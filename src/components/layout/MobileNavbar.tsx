@@ -1,7 +1,7 @@
 // components/layout/MobileNavbar.tsx
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { NavItem } from "@/lib/types";
@@ -48,47 +48,42 @@ const navItems: NavItem[] = [
 ];
 
 const MobileNavbar: React.FC = () => {
-    const [isScrolled, setIsScrolled] = useState<boolean>(false);
+    const [scrollY, setScrollY] = useState(0);
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-    const [showRibbon, setShowRibbon] = useState<boolean>(true);
     const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
-    const lastScrollY = useRef<number>(0);
-    const scrollThreshold = useRef<number>(10);
+
+    // Derived states based on scroll position
+    const showRibbon = scrollY <= 50;
+    const isScrolled = scrollY > 50;
+    const ribbonHeight = showRibbon ? 40 : 0;
+
+    const rafRef = useRef<number | undefined>(undefined);
+
+    const handleScroll = useCallback(() => {
+        if (rafRef.current) {
+            cancelAnimationFrame(rafRef.current);
+        }
+
+        rafRef.current = requestAnimationFrame(() => {
+            const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
+            setScrollY(currentScrollY);
+        });
+    }, []);
 
     useEffect(() => {
-        const handleScroll = () => {
-            const currentScrollY = window.scrollY;
-            const scrollDifference = Math.abs(currentScrollY - lastScrollY.current);
+        // Set initial scroll position
+        setScrollY(window.pageYOffset || document.documentElement.scrollTop);
 
-            // Only update if scroll difference is significant enough to prevent jitter
-            if (scrollDifference > scrollThreshold.current) {
-                const shouldShowRibbon = currentScrollY <= 30;
-                const shouldBeScrolled = currentScrollY > 30;
-
-                setShowRibbon(shouldShowRibbon);
-                setIsScrolled(shouldBeScrolled);
-
-                lastScrollY.current = currentScrollY;
-            }
-        };
-
-        // Throttle scroll events for better performance
-        let timeoutId: NodeJS.Timeout;
-        const throttledScrollHandler = () => {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(handleScroll, 16); // ~60fps
-        };
-
-        window.addEventListener("scroll", throttledScrollHandler, { passive: true });
-
-        // Initial call
-        handleScroll();
+        // Add scroll listener
+        window.addEventListener('scroll', handleScroll, { passive: true });
 
         return () => {
-            window.removeEventListener("scroll", throttledScrollHandler);
-            clearTimeout(timeoutId);
+            window.removeEventListener('scroll', handleScroll);
+            if (rafRef.current) {
+                cancelAnimationFrame(rafRef.current);
+            }
         };
-    }, []);
+    }, [handleScroll]);
 
     const toggleMenu = () => setIsMenuOpen((prev) => !prev);
     const toggleSubmenu = (title: string) => {
@@ -96,86 +91,89 @@ const MobileNavbar: React.FC = () => {
     };
 
     return (
-        <div className="fixed w-full z-40">
+        <motion.div
+            className="fixed w-full z-40"
+            style={{ top: 0 }}
+        >
             {/* Ribbon Section */}
-            <AnimatePresence>
+            <motion.div
+                animate={{
+                    height: ribbonHeight,
+                    opacity: showRibbon ? 1 : 0,
+                }}
+                transition={{
+                    type: "tween",
+                    duration: 0.3,
+                    ease: [0.4, 0, 0.2, 1]
+                }}
+                className="relative bg-red-600 text-white shadow-md overflow-hidden"
+            >
+                <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
+                    <ul className="flex items-center gap-4 m-0 p-0 list-none">
+                        <li>
+                            <a href="tel:01-4520655" className="text-white hover:text-gray-200 flex items-center text-sm">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="mr-1.5 flex-shrink-0"
+                                >
+                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                </svg>
+                                <span className="hidden sm:inline">01-4520655, 01-4520656</span>
+                                <span className="sm:hidden">01-4520655</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="mailto:info@nec.gov.np" className="text-white hover:text-gray-200 flex items-center text-sm">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="mr-1.5 flex-shrink-0"
+                                >
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                                <span className="hidden sm:inline">info@nec.gov.np</span>
+                                <span className="sm:hidden">info@nec.gov.np</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                {/* Decorative corners - only show when ribbon is visible */}
                 {showRibbon && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -40 }}
-                        transition={{
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 30,
-                            mass: 0.8
-                        }}
-                        className="relative bg-red-600 text-white shadow-md"
-                        style={{ height: '40px' }}
-                    >
-                        <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
-                            <ul className="flex items-center gap-4 m-0 p-0 list-none">
-                                <li>
-                                    <a href="tel:01-4520655" className="text-white hover:text-gray-200 flex items-center text-sm">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="14"
-                                            height="14"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            className="mr-1.5 flex-shrink-0"
-                                        >
-                                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                                        </svg>
-                                        <span className="hidden sm:inline">01-4520655, 01-4520656</span>
-                                        <span className="sm:hidden">01-4520655</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="mailto:info@nec.gov.np" className="text-white hover:text-gray-200 flex items-center text-sm">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="14"
-                                            height="14"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            className="mr-1.5 flex-shrink-0"
-                                        >
-                                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                                            <polyline points="22,6 12,13 2,6"></polyline>
-                                        </svg>
-                                        <span className="hidden sm:inline">info@nec.gov.np</span>
-                                        <span className="sm:hidden">info@nec.gov.np</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                    <>
                         <div className="absolute top-0 left-0 border-t-[40px] border-t-[#991f2b] border-r-[20px] border-r-transparent w-0 h-0"></div>
                         <div className="absolute top-0 right-0 border-t-[40px] border-t-[#991f2b] border-l-[20px] border-l-transparent w-0 h-0"></div>
-                    </motion.div>
+                    </>
                 )}
-            </AnimatePresence>
+            </motion.div>
 
             {/* Main Navbar Section */}
             <motion.nav
                 animate={{
-                    backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.98)" : "rgba(255, 255, 255, 0)",
+                    backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.95)" : "rgba(0, 0, 0, 0)",
                     backdropFilter: isScrolled ? "blur(10px)" : "blur(0px)",
                     boxShadow: isScrolled ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)" : "0 0 0 0 transparent",
                 }}
                 transition={{
-                    type: "spring",
-                    stiffness: 400,
-                    damping: 40,
-                    mass: 0.6
+                    type: "tween",
+                    duration: 0.3,
+                    ease: [0.4, 0, 0.2, 1]
                 }}
                 className="w-full"
             >
@@ -186,17 +184,15 @@ const MobileNavbar: React.FC = () => {
                             alt="NEC Logo"
                             width={180}
                             height={72}
-                            className="object-contain transition-all duration-300"
+                            className="object-contain"
                             priority
                         />
                     </Link>
 
-                    <motion.button
+                    <button
                         className="flex flex-col gap-1.5 w-8 h-8 justify-center items-center z-50 relative"
                         onClick={toggleMenu}
                         aria-label="Toggle navigation menu"
-                        whileTap={{ scale: 0.95 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
                     >
                         <motion.span
                             animate={{
@@ -204,7 +200,11 @@ const MobileNavbar: React.FC = () => {
                                 rotate: isMenuOpen ? 45 : 0,
                                 y: isMenuOpen ? 8 : 0,
                             }}
-                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                            transition={{
+                                type: "tween",
+                                duration: 0.2,
+                                ease: [0.4, 0, 0.2, 1]
+                            }}
                             className="w-full h-0.5 block origin-center"
                         />
                         <motion.span
@@ -213,7 +213,11 @@ const MobileNavbar: React.FC = () => {
                                 opacity: isMenuOpen ? 0 : 1,
                                 scaleX: isMenuOpen ? 0 : 1,
                             }}
-                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                            transition={{
+                                type: "tween",
+                                duration: 0.2,
+                                ease: [0.4, 0, 0.2, 1]
+                            }}
                             className="w-full h-0.5 block origin-center"
                         />
                         <motion.span
@@ -222,10 +226,14 @@ const MobileNavbar: React.FC = () => {
                                 rotate: isMenuOpen ? -45 : 0,
                                 y: isMenuOpen ? -8 : 0,
                             }}
-                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                            transition={{
+                                type: "tween",
+                                duration: 0.2,
+                                ease: [0.4, 0, 0.2, 1]
+                            }}
                             className="w-full h-0.5 block origin-center"
                         />
-                    </motion.button>
+                    </button>
                 </div>
             </motion.nav>
 
@@ -233,25 +241,21 @@ const MobileNavbar: React.FC = () => {
             <AnimatePresence>
                 {isMenuOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: -20, height: 0 }}
-                        animate={{ opacity: 1, y: 0, height: "auto" }}
-                        exit={{ opacity: 0, y: -20, height: 0 }}
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
                         transition={{
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 30,
-                            mass: 0.8
+                            type: "tween",
+                            duration: 0.3,
+                            ease: [0.4, 0, 0.2, 1]
                         }}
-                        className="bg-white/98 backdrop-blur-md shadow-lg border-t border-gray-100"
+                        className="bg-white/95 backdrop-blur-md shadow-lg border-t border-gray-100"
                     >
                         <div className="max-w-7xl mx-auto px-4 py-2 max-h-96 overflow-y-auto">
                             {navItems.map((item, index) => (
-                                <motion.div
+                                <div
                                     key={index}
                                     className="border-b border-gray-100 last:border-b-0"
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: index * 0.05 }}
                                 >
                                     {item.submenu ? (
                                         <div>
@@ -262,7 +266,11 @@ const MobileNavbar: React.FC = () => {
                                                 {item.title}
                                                 <motion.svg
                                                     animate={{ rotate: activeSubmenu === item.title ? 180 : 0 }}
-                                                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                                                    transition={{
+                                                        type: "tween",
+                                                        duration: 0.2,
+                                                        ease: [0.4, 0, 0.2, 1]
+                                                    }}
                                                     className="w-4 h-4"
                                                     fill="none"
                                                     stroke="currentColor"
@@ -278,19 +286,14 @@ const MobileNavbar: React.FC = () => {
                                                         animate={{ opacity: 1, height: "auto" }}
                                                         exit={{ opacity: 0, height: 0 }}
                                                         transition={{
-                                                            type: "spring",
-                                                            stiffness: 300,
-                                                            damping: 30
+                                                            type: "tween",
+                                                            duration: 0.25,
+                                                            ease: [0.4, 0, 0.2, 1]
                                                         }}
-                                                        className="pl-4 pb-2 bg-gray-50/50"
+                                                        className="pl-4 pb-2 bg-gray-50/50 overflow-hidden"
                                                     >
                                                         {item.submenu.map((subitem, subindex) => (
-                                                            <motion.li
-                                                                key={subindex}
-                                                                initial={{ opacity: 0, x: -10 }}
-                                                                animate={{ opacity: 1, x: 0 }}
-                                                                transition={{ delay: subindex * 0.05 }}
-                                                            >
+                                                            <li key={subindex}>
                                                                 <Link
                                                                     href={subitem.href}
                                                                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-indigo-600 rounded-md transition-colors duration-200"
@@ -301,7 +304,7 @@ const MobileNavbar: React.FC = () => {
                                                                 >
                                                                     {subitem.title}
                                                                 </Link>
-                                                            </motion.li>
+                                                            </li>
                                                         ))}
                                                     </motion.ul>
                                                 )}
@@ -319,13 +322,13 @@ const MobileNavbar: React.FC = () => {
                                             {item.title}
                                         </Link>
                                     )}
-                                </motion.div>
+                                </div>
                             ))}
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
+        </motion.div>
     );
 };
 
