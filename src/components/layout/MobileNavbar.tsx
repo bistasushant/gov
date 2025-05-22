@@ -49,7 +49,6 @@ const navItems: NavItem[] = [
 
 const MobileNavbar: React.FC = () => {
     const [scrollY, setScrollY] = useState(0);
-    const [prevScrollY, setPrevScrollY] = useState(0);
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
 
@@ -73,7 +72,6 @@ const MobileNavbar: React.FC = () => {
 
             // Only update state if scroll position actually changed
             if (Math.abs(currentScrollY - scrollY) > 1) {
-                setPrevScrollY(scrollY);
                 setScrollY(currentScrollY);
             }
         }, 16); // ~60fps
@@ -83,7 +81,6 @@ const MobileNavbar: React.FC = () => {
         // Set initial scroll position
         const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
         setScrollY(currentScrollY);
-        setPrevScrollY(currentScrollY);
 
         // Add scroll listener
         window.addEventListener('scroll', handleScroll, { passive: true });
