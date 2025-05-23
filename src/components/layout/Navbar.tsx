@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -18,6 +18,7 @@ const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [showRibbon, setShowRibbon] = useState<boolean>(true);
   const [lastScrollY, setLastScrollY] = useState<number>(0);
+  const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,9 +53,21 @@ const Navbar: React.FC = () => {
     return () => window.removeEventListener("scroll", scrollListener);
   }, [lastScrollY]);
 
+  // Function to determine submenu positioning
+  const getSubmenuClasses = (index: number) => {
+    const totalItems = navItems.filter(item => item.submenu).length;
+    const isLastItem = index >= Math.floor(totalItems / 2);
+
+    return `absolute mt-2 z-[9999] ${isLastItem
+      ? "right-0 sm:right-0 md:left-0 md:right-auto"
+      : "left-0 sm:left-0"
+      }`;
+  };
+
   return (
     <nav
-      className={`fixed w-full z-40 transition-all duration-300 ease-in-out ${isScrolled ? "bg-white/80 shadow-md" : "bg-transparent"
+      ref={navRef}
+      className={`fixed w-full z-40 transition-all duration-300 ease-in-out ${isScrolled ? "bg-white/80 backdrop-blur-sm shadow-md" : "bg-transparent"
         }`}
     >
       <AnimatePresence mode="wait">
@@ -71,13 +84,15 @@ const Navbar: React.FC = () => {
                 <li>
                   <a href="tel:01-4520655" className="text-white hover:text-gray-200 flex items-center">
                     <Phone className="text-white w-4 h-4 mr-1.5 hover:text-gray-200 flex items-center" />
-                    01-4520655, 01-4520656
+                    <span className="hidden sm:inline">01-4520655, 01-4520656</span>
+                    <span className="sm:hidden">Call Us</span>
                   </a>
                 </li>
                 <li>
                   <a href="mailto:info@nec.gov.np" className="text-white hover:text-gray-200 flex items-center">
                     <Mail className="h-4 w-4 mr-1.5" />
-                    info@nec.gov.np
+                    <span className="hidden sm:inline">info@nec.gov.np</span>
+                    <span className="sm:hidden">Email</span>
                   </a>
                 </li>
               </ul>
@@ -95,54 +110,58 @@ const Navbar: React.FC = () => {
         }}
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between py-3"
       >
-        <Link href="/" className="flex items-center">
+        <Link href="/" className="flex items-center flex-shrink-0">
           <Image
             src="/images/logo-dark.png"
             alt="NEC Logo"
             width={300}
             height={120}
-            className="object-contain"
+            className="object-contain max-w-[200px] sm:max-w-[250px] md:max-w-[300px]"
           />
         </Link>
 
-        <NavigationMenu>
+        <NavigationMenu className="hidden md:block">
           <NavigationMenuList className="flex gap-2">
             {navItems.map((item, index) => (
               <NavigationMenuItem key={index}>
                 {item.submenu ? (
                   <>
                     <NavigationMenuTrigger
-                      className={`px-4 py-2 font-bold ${isScrolled ? "text-black hover:text-indigo-500" : "text-white hover:text-indigo-200"
+                      className={`px-4 py-2 font-bold transition-colors duration-200 ${isScrolled
+                        ? "text-black hover:text-indigo-500"
+                        : "text-white hover:text-indigo-200"
                         }`}
                     >
                       {item.title}
                     </NavigationMenuTrigger>
                     <div className="relative">
-
-                      <NavigationMenuContent className="absolute right-0 sm:left-0 sm:right-auto mt-2 z-[9999]">
-                        <ul className="grid w-[300px] max-h-[80vh] overflow-auto bg-white shadow-lg border border-gray-200 rounded-md p-2">
-                          {item.submenu.map((subitem, subindex) => (
-                            <li key={subindex}>
-                              <NavigationMenuLink asChild>
-                                <Link
-                                  href={subitem.href}
-                                  className="block px-4 py-2 text-sm font-bold text-gray-800 hover:bg-gray-100 hover:text-indigo-600"
-                                >
-                                  {subitem.title}
-                                </Link>
-                              </NavigationMenuLink>
-                            </li>
-                          ))}
-                        </ul>
+                      <NavigationMenuContent className={getSubmenuClasses(index)}>
+                        <div className="w-[280px] sm:w-[320px] max-h-[70vh] overflow-auto bg-white shadow-xl border border-gray-200 rounded-lg">
+                          <ul className="p-2 space-y-1">
+                            {item.submenu.map((subitem, subindex) => (
+                              <li key={subindex}>
+                                <NavigationMenuLink asChild>
+                                  <Link
+                                    href={subitem.href}
+                                    className="block px-4 py-3 text-sm font-medium text-gray-800 hover:bg-gray-50 hover:text-indigo-600 rounded-md transition-colors duration-150"
+                                  >
+                                    {subitem.title}
+                                  </Link>
+                                </NavigationMenuLink>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       </NavigationMenuContent>
                     </div>
-
                   </>
                 ) : (
                   <NavigationMenuLink asChild>
                     <Link
                       href={item.href}
-                      className={`block px-4 py-2 font-bold ${isScrolled ? "text-black hover:text-indigo-500" : "text-white hover:text-indigo-200"
+                      className={`block px-4 py-2 font-bold transition-colors duration-200 ${isScrolled
+                        ? "text-black hover:text-indigo-500"
+                        : "text-white hover:text-indigo-200"
                         }`}
                     >
                       {item.title}
@@ -153,6 +172,21 @@ const Navbar: React.FC = () => {
             ))}
           </NavigationMenuList>
         </NavigationMenu>
+
+        {/* Mobile Menu Button - You can add this if needed */}
+        <div className="md:hidden">
+          <button
+            className={`p-2 rounded-md transition-colors duration-200 ${isScrolled
+              ? "text-black hover:bg-gray-100"
+              : "text-white hover:bg-white/10"
+              }`}
+            aria-label="Open menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
       </motion.div>
     </nav>
   );
