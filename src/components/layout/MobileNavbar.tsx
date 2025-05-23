@@ -110,8 +110,8 @@ const MobileNavbar: React.FC = () => {
             >
                 <motion.nav
                     animate={{
-                        backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.95)" : "rgba(0, 0, 0, 0)",
-                        backdropFilter: isScrolled ? "blur(10px)" : "blur(0px)",
+                        backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0)",
+                        backdropFilter: isScrolled ? "blur(5px)" : "blur(0px)",
                         boxShadow: isScrolled ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)" : "none",
                     }}
                     transition={{
@@ -119,7 +119,7 @@ const MobileNavbar: React.FC = () => {
                     }}
                     className="w-full"
                 >
-                    <div className={`max-w-7xl mx-auto px-4 flex items-center justify-between py-3 ${isMenuOpen && "bg-white/95 backdrop-blur-md "}`}>
+                    <div className={`max-w-7xl mx-auto px-4 flex items-center justify-between py-3 ${isMenuOpen && "bg-white/50 backdrop-blur-md "}`}>
                         <Link href="/" className="flex items-center z-50">
                             <Image
                                 src="/images/logo-dark.png"

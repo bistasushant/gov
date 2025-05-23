@@ -54,7 +54,7 @@ const Navbar: React.FC = () => {
 
   return (
     <nav
-      className={`fixed w-full z-40 transition-all duration-300 ease-in-out ${isScrolled ? "bg-white/90 shadow-md" : "bg-transparent"
+      className={`fixed w-full z-40 transition-all duration-300 ease-in-out ${isScrolled ? "bg-white/80 shadow-md" : "bg-transparent"
         }`}
     >
       <AnimatePresence mode="wait">
