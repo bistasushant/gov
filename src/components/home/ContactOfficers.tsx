@@ -47,10 +47,10 @@ const ContactOfficer: React.FC<ContactOfficerItem> = ({
   return (
     <div
       ref={cardRef}
-      className="group relative p-4 sm:p-6 shadow rounded-md bg-white overflow-hidden hover:shadow-lg transition-all duration-500 max-w-lg w-full opacity-0"
+      className="group relative p-4 sm:p-6 shadow rounded-md bg-white overflow-hidden hover:shadow-lg transition-all duration-500 max-w-lg w-full opacity-0 hover:-translate-y-2 hover:scale-[1.02]"
     >
       <div className="flex flex-col items-center">
-        <div className="mb-4 overflow-hidden rounded-full">
+        <div className="mb-4 overflow-hidden rounded-full transform group-hover:rotate-3 transition-transform duration-500">
           <Image
             src={image}
             alt={title}
@@ -60,14 +60,14 @@ const ContactOfficer: React.FC<ContactOfficerItem> = ({
           />
         </div>
         <div className="text-center">
-          <h4 className="text-xl font-semibold mb-2">{title}</h4>
-          <div className="mb-4">
-            <h6 className="font-medium">{name}</h6>
-            <p className="text-sm text-slate-400">{regNo}</p>
-            <p className="text-sm text-slate-400">{phone}</p>
-            <p className="text-sm text-slate-400">{officePhone}</p>
-            <p className="text-sm text-indigo-600">{email}</p>
-            <p className="text-sm text-slate-400">{position}</p>
+          <h4 className="text-xl font-semibold mb-2 transform group-hover:scale-105 transition-transform duration-300">{title}</h4>
+          <div className="mb-4 transform group-hover:translate-y-1 transition-transform duration-300">
+            <h6 className="font-medium group-hover:text-indigo-600 transition-colors duration-300">{name}</h6>
+            <p className="text-sm text-slate-400 group-hover:text-slate-500 transition-colors duration-300">{regNo}</p>
+            <p className="text-sm text-slate-400 group-hover:text-slate-500 transition-colors duration-300">{phone}</p>
+            <p className="text-sm text-slate-400 group-hover:text-slate-500 transition-colors duration-300">{officePhone}</p>
+            <p className="text-sm text-indigo-600 group-hover:text-indigo-700 transition-colors duration-300">{email}</p>
+            <p className="text-sm text-slate-400 group-hover:text-slate-500 transition-colors duration-300">{position}</p>
           </div>
         </div>
       </div>

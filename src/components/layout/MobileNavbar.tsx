@@ -119,7 +119,7 @@ const MobileNavbar: React.FC = () => {
                     }}
                     className="w-full"
                 >
-                    <div className={`max-w-7xl mx-auto px-4 flex items-center justify-between py-3 ${isMenuOpen && "bg-white/50 backdrop-blur-md "}`}>
+                    <div className={`max-w-7xl mx-auto px-4 flex items-center justify-between py-3 ${isMenuOpen && "bg-white/40 backdrop-blur-lg "}`}>
                         <Link href="/" className="flex items-center z-50">
                             <Image
                                 src="/images/logo-dark.png"

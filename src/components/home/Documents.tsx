@@ -50,16 +50,16 @@ const DocumentCategory: React.FC<DocumentCategoryProps> = ({
     <Link
       ref={cardRef}
       href={link}
-      className="group relative p-4 sm:p-6 shadow rounded-md bg-white overflow-hidden hover:shadow-lg transition-all duration-500 max-w-sm w-full flex flex-col items-center justify-center text-center opacity-0"
+      className="group relative p-4 sm:p-6 shadow rounded-md bg-white overflow-hidden hover:shadow-lg transition-all duration-500 max-w-sm w-full flex flex-col items-center justify-center text-center opacity-0 hover:-translate-y-2 hover:scale-[1.02]"
     >
-      <div className="w-16 h-16 flex items-center justify-center bg-indigo-600/10 group-hover:bg-indigo-600 rounded-full text-indigo-600 group-hover:text-white transition-all duration-500 mb-4">
+      <div className="w-16 h-16 flex items-center justify-center bg-indigo-600/10 group-hover:bg-indigo-600 rounded-full text-indigo-600 group-hover:text-white transition-all duration-500 mb-4 transform group-hover:rotate-6 group-hover:scale-110">
         {typeof icon === 'string' ? (
           <span className="h-6 w-6">{icon}</span>
         ) : (
           icon
         )}
       </div>
-      <h5 className="text-lg font-medium group-hover:text-indigo-600 transition-all duration-500">
+      <h5 className="text-lg font-medium group-hover:text-indigo-600 transition-all duration-500 transform group-hover:scale-105">
         {title}
       </h5>
     </Link>

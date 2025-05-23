@@ -44,23 +44,23 @@ const ServiceCard: React.FC<ServiceItem> = ({
   return (
     <div
       ref={cardRef}
-      className="group relative p-4 sm:p-6 shadow rounded-md bg-white overflow-hidden hover:shadow-lg transition-all duration-500 max-w-sm w-full opacity-0"
+      className="group relative p-4 sm:p-6 shadow rounded-md bg-white overflow-hidden hover:shadow-lg transition-all duration-500 max-w-sm w-full opacity-0 hover:-translate-y-2 hover:scale-[1.02]"
     >
-      <div className="w-14 h-14 flex items-center justify-center bg-indigo-600 group-hover:bg-indigo-700 rounded-md text-white transition-all duration-500 mb-6 mx-auto">
+      <div className="w-14 h-14 flex items-center justify-center bg-indigo-600 group-hover:bg-indigo-700 rounded-md text-white transition-all duration-500 mb-6 mx-auto transform group-hover:rotate-6">
         {typeof icon === 'string' ? (
           <span className="h-6 w-6">{icon}</span>
         ) : (
           icon
         )}
       </div>
-      <h4 className="text-lg font-medium group-hover:text-indigo-600 transition-all duration-500 text-center">
+      <h4 className="text-lg font-medium group-hover:text-indigo-600 transition-all duration-500 text-center transform group-hover:scale-105">
         {title}
       </h4>
       <p className="text-slate-400 mt-3 text-center">{description}</p>
       <div className="mt-4 flex justify-center">
         <Link
           href={link}
-          className="text-indigo-600 hover:text-indigo-700 font-medium"
+          className="text-indigo-600 hover:text-indigo-700 font-medium inline-flex items-center gap-2 group-hover:translate-x-1 transition-transform duration-300"
         >
           Learn More <i className="uil uil-arrow-right"></i>
         </Link>

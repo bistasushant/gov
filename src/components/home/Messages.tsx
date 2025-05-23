@@ -47,10 +47,10 @@ const MessageCard: React.FC<MessageItem> = ({
   return (
     <div
       ref={cardRef}
-      className="group relative p-4 sm:p-6 shadow rounded-md bg-white overflow-hidden hover:shadow-lg transition-all duration-500 max-w-lg w-full opacity-0"
+      className="group relative p-4 sm:p-6 shadow rounded-md bg-white overflow-hidden hover:shadow-lg transition-all duration-500 max-w-lg w-full opacity-0 hover:-translate-y-2 hover:scale-[1.02]"
     >
       <div className="flex flex-col items-center">
-        <div className="mb-4 overflow-hidden rounded-full">
+        <div className="mb-4 overflow-hidden rounded-full transform group-hover:rotate-3 transition-transform duration-500">
           <Image
             src={image}
             alt={title}
@@ -60,16 +60,16 @@ const MessageCard: React.FC<MessageItem> = ({
           />
         </div>
         <div className="text-center">
-          <h4 className="text-xl font-semibold mb-2">{title}</h4>
-          <p className="text-slate-400 mb-4">{message}</p>
-          <div className="mb-4">
-            <h6 className="font-medium">{name}</h6>
+          <h4 className="text-xl font-semibold mb-2 transform group-hover:scale-105 transition-transform duration-300">{title}</h4>
+          <p className="text-slate-400 mb-4 group-hover:text-slate-500 transition-colors duration-300">{message}</p>
+          <div className="mb-4 transform group-hover:translate-y-1 transition-transform duration-300">
+            <h6 className="font-medium group-hover:text-indigo-600 transition-colors duration-300">{name}</h6>
             <p className="text-sm text-slate-400">{regNo}</p>
             <p className="text-sm text-indigo-600">{position}</p>
           </div>
           <Link
             href={link}
-            className="text-indigo-600 hover:text-indigo-700 font-medium"
+            className="text-indigo-600 hover:text-indigo-700 font-medium inline-flex items-center gap-2 group-hover:translate-x-1 transition-transform duration-300"
           >
             Read Full Message <i className="uil uil-arrow-right"></i>
           </Link>
